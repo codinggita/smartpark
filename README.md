@@ -149,7 +149,14 @@ src/
 
 ## 📸 Screenshots / Demo
 
-> figma.com/design/tcbq1AsxRmYeQGcp6CEE2r/Untitled?t=v39RPohvDzYp5TV4-0
+> [Figma Design Link](https://www.figma.com/design/tcbq1AsxRmYeQGcp6CEE2r/Untitled?node-id=0-1&p=f&t=6yKjmX8wIo0pptUS-0)
+
+### 📸 Application Views
+
+![View 1](./frontend/src/assets/Screenshot%202026-04-22%20231850.png)
+![View 2](./frontend/src/assets/Screenshot%202026-04-22%20231909.png)
+![View 3](./frontend/src/assets/Screenshot%202026-04-22%20231925.png)
+![View 4](./frontend/src/assets/Screenshot%202026-04-22%20232103.png)
 
 ---
 
