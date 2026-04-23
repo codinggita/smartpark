@@ -1,3 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0052cc;
+  --color-secondary: #36b37e;
+  --color-tertiary: #ffab00;
+  --color-neutral: #757780;
+  --color-neutral-dark: #172b4d;
+  --color-background: #f4f5f7;
+  --font-inter: "Inter", sans-serif;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-full w-full bg-background text-neutral-dark font-inter;
+  }
+}
+
