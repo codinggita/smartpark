@@ -14,12 +14,12 @@ const Layout = () => {
             SmartPark
           </span>
         </div>
-        ;
+
         <div className="ml-auto flex items-center gap-6">
           <Link to="/" className="text-neutral font-medium hover:text-primary transition-colors">Home</Link>
-          <button className="px-4 py-2 rounded-lg bg-primary hover:bg-blue-700 text-white transition-colors font-medium text-sm shadow-sm shadow-primary/20">
+          <Link to="/login" className="px-4 py-2 rounded-lg bg-primary hover:bg-blue-700 text-white transition-colors font-medium text-sm shadow-sm shadow-primary/20">
             Sign In
-          </button>
+          </Link>
         </div>
       </nav>
 
