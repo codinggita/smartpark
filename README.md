@@ -1,17 +1,17 @@
-# 🚗 SmartPark — Parking & Valet Visibility System
+# SmartPark — Parking & Valet Visibility System
 
-## 📌 Overview
+## Overview
 
 SmartPark is a frontend-based smart mobility prototype designed to solve two common urban problems:
 
-* 🚘 Drivers wasting time searching for parking in crowded areas
-* 🅿️ Valet users lacking visibility of where their car is parked
+* Drivers wasting time searching for parking in crowded areas
+* Valet users lacking visibility of where their car is parked
 
 This project provides a **map-based interface with simulated real-time updates** to visualize parking availability and valet vehicle tracking.
 
 ---
 
-## 🎯 Problem Statements
+## Problem Statements
 
 1. **Parking Discovery Problem**
    Drivers circle busy markets for long periods due to a lack of real-time parking availability.
@@ -21,30 +21,30 @@ This project provides a **map-based interface with simulated real-time updates**
 
 ---
 
-## 💡 Solution
+## Solution
 
 SmartPark provides:
 
-* 📍 Real-time (simulated) parking availability on a map
-* 🚗 Valet tracking system with moving vehicle simulation
-* 📊 Interactive UI for booking and monitoring parking
+* Real-time (simulated) parking availability on a map
+* Valet tracking system with moving vehicle simulation
+* Interactive UI for booking and monitoring parking
 
 ---
 
-## 🚀 Features
+## Features
 
-### 🗺️ Smart Parking Map
+### Smart Parking Map
 
 * Integrated with Google Maps Platform
 * Color-coded parking markers:
 
-  * 🟢 Available
-  * 🔴 Occupied
-  * 🟡 Limited
+  * Available
+  * Occupied
+  * Limited
 
 ---
 
-### 📦 Booking System (Frontend Simulation)
+### Booking System (Frontend Simulation)
 
 * Click parking spot → view details
 * Book parking via modal
@@ -52,7 +52,7 @@ SmartPark provides:
 
 ---
 
-### 🚗 Valet Tracking (Core Feature)
+### Valet Tracking (Core Feature)
 
 * Use valet option
 * Track car on map
@@ -65,14 +65,14 @@ SmartPark provides:
 
 ---
 
-### 🔄 Real-Time Simulation
+### Real-Time Simulation
 
 * Dynamic parking availability updates
 * Car movement using timed coordinate changes
 
 ---
 
-### 🎨 UI/UX Features
+### UI/UX Features
 
 * Responsive dashboard layout
 * Navbar + sidebar navigation
@@ -82,28 +82,28 @@ SmartPark provides:
 
 ---
 
-### 🌗 Theme System
+### Theme System
 
 * Light / Dark mode
 * Stored using localStorage
 
 ---
 
-### ⚙️ State Management
+### State Management
 
 * Redux Toolkit for global state
 * Parking and valet state handling
 
 ---
 
-### 🔁 Fake API Layer
+### Fake API Layer
 
 * Simulated backend using async functions
 * Handles loading and error states
 
 ---
 
-### 📊 Additional Features
+### Additional Features
 
 * Search & filter parking spots
 * Booking history (UI)
@@ -112,7 +112,7 @@ SmartPark provides:
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 * **Frontend:** React (Vite)
 * **Styling:** Tailwind CSS, MUI
@@ -122,7 +122,7 @@ SmartPark provides:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 src/
@@ -138,7 +138,7 @@ src/
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
 * Parking data is stored locally and managed via Redux
 * API calls are simulated using Promises
@@ -147,11 +147,11 @@ src/
 
 ---
 
-## 📸 Screenshots / Demo
+## Screenshots / Demo
 
 > [Figma Design Link](https://www.figma.com/design/tcbq1AsxRmYeQGcp6CEE2r/Untitled?node-id=0-1&p=f&t=6yKjmX8wIo0pptUS-0)
 
-### 📸 Application Views
+### Application Views
 
 ![View 1](./frontend/src/assets/Screenshot%202026-04-22%20231850.png)
 ![View 2](./frontend/src/assets/Screenshot%202026-04-22%20231909.png)
@@ -160,7 +160,7 @@ src/
 
 ---
 
-## 🔧 Setup Instructions
+## Setup Instructions
 
 ```bash
 # Clone the repository
@@ -178,7 +178,7 @@ npm run dev
 
 ---
 
-## 📌 Future Improvements
+## Future Improvements
 
 * Backend integration (Node.js / Firebase)
 * Real-time GPS tracking
@@ -187,7 +187,7 @@ npm run dev
 
 ---
 
-## 🎓 Learning Outcomes
+## Learning Outcomes
 
 * Built a scalable frontend architecture
 * Implemented map-based UI with real-time simulation
@@ -195,12 +195,12 @@ npm run dev
 
 ---
 
-## 💬 Project Statement
+## Project Statement
 
 > “SmartPark reduces parking search time and improves valet transparency using map-based visualization and simulated real-time tracking.”
 
 ---
 
-## 📄 License
+## License
 
 This project is for educational and demonstration purposes.
