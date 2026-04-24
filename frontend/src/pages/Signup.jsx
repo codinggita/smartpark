@@ -43,7 +43,7 @@ const Signup = () => {
                   name="fullName"
                   type="text"
                   className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-neutral-dark"
-                  placeholder="John Doe"
+                  placeholder="Enter your full name"
                   required
                   value={formData.fullName}
                   onChange={handleChange}
@@ -59,7 +59,7 @@ const Signup = () => {
                   name="email"
                   type="email"
                   className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-neutral-dark"
-                  placeholder="name@example.com"
+                  placeholder="Enter your email"
                   required
                   value={formData.email}
                   onChange={handleChange}
