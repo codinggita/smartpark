@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const Home = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-background">
@@ -12,9 +14,9 @@ const Home = () => {
           SmartPark connects you to available parking spots in real-time. No more circling the block. Reserve your spot and arrive stress-free.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <button className="px-8 py-3 rounded-xl bg-primary hover:bg-blue-700 text-white transition-all font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-1">
+          <Link to="/dashboard" className="px-8 py-3 rounded-xl bg-primary hover:bg-blue-700 text-white transition-all font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-1 inline-block">
             Find Parking
-          </button>
+          </Link>
           <button className="px-8 py-3 rounded-xl bg-white text-neutral-dark hover:bg-gray-50 border border-gray-200 transition-all font-semibold shadow-sm">
             Learn More
           </button>
