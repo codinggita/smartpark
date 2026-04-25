@@ -116,6 +116,7 @@ const Login = () => {
             </div>
 
             <button
+              type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
               className="w-full mt-8 py-3.5 px-4 bg-white border-2 border-slate-100 hover:border-slate-200 hover:bg-slate-50 rounded-2xl flex items-center justify-center gap-3 transition-all text-slate-700 font-bold disabled:opacity-70"

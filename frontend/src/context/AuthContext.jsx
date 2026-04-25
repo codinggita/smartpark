@@ -1,5 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Snackbar, Alert } from '@mui/material';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { auth, googleProvider } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -21,76 +29,82 @@ export const AuthProvider = ({ children }) => {
     setToast({ ...toast, open: false });
   };
 
-  // Check local storage on mount
+  // Listen to Firebase Auth state changes
   useEffect(() => {
-    const storedAuth = localStorage.getItem('smartpark_auth');
-    if (storedAuth) {
-      const { isAuthenticated: isAuth, userRole: role, user: userData } = JSON.parse(storedAuth);
-      setIsAuthenticated(isAuth);
-      setUserRole(role);
-      setUser(userData);
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setIsAuthenticated(true);
+        setUser({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          name: currentUser.displayName || currentUser.email.split('@')[0],
+          photoURL: currentUser.photoURL
+        });
+        
+        // Retrieve role from local storage since Firebase Auth doesn't store role natively without Firestore/Custom Claims
+        const storedRole = localStorage.getItem('smartpark_user_role') || 'user';
+        setUserRole(storedRole);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        setUserRole(null);
+        localStorage.removeItem('smartpark_user_role');
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  const login = (email, password, role) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email && password) {
-          const authData = { isAuthenticated: true, userRole: role, user: { email, name: email.split('@')[0] } };
-          setIsAuthenticated(true);
-          setUserRole(role);
-          setUser(authData.user);
-          localStorage.setItem('smartpark_auth', JSON.stringify(authData));
-          showToast(`Successfully logged in as ${role}`, 'success');
-          resolve(authData);
-        } else {
-          showToast('Invalid credentials', 'error');
-          reject(new Error('Invalid credentials'));
-        }
-      }, 1000);
-    });
+  const login = async (email, password, role) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Save role for this session
+      localStorage.setItem('smartpark_user_role', role);
+      setUserRole(role);
+      showToast(`Successfully logged in as ${role}`, 'success');
+      return userCredential.user;
+    } catch (error) {
+      showToast(error.message || 'Failed to login', 'error');
+      throw error;
+    }
   };
 
-  const googleLogin = () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const authData = { isAuthenticated: true, userRole: 'user', user: { email: 'user@google.com', name: 'Google User' } };
-        setIsAuthenticated(true);
-        setUserRole('user');
-        setUser(authData.user);
-        localStorage.setItem('smartpark_auth', JSON.stringify(authData));
-        showToast('Successfully logged in with Google', 'success');
-        resolve(authData);
-      }, 800);
-    });
+  const googleLogin = async () => {
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      // Default Google login to 'user' role
+      localStorage.setItem('smartpark_user_role', 'user');
+      setUserRole('user');
+      showToast(`Successfully logged in with Google as ${userCredential.user.displayName}`, 'success');
+      return userCredential.user;
+    } catch (error) {
+      showToast(error.message || 'Google login failed', 'error');
+      throw error;
+    }
   };
 
-  const signup = (email, password, name) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email && password && name) {
-          const authData = { isAuthenticated: true, userRole: 'user', user: { email, name } };
-          setIsAuthenticated(true);
-          setUserRole('user');
-          setUser(authData.user);
-          localStorage.setItem('smartpark_auth', JSON.stringify(authData));
-          showToast('Account created successfully', 'success');
-          resolve(authData);
-        } else {
-          showToast('Please fill all fields', 'error');
-          reject(new Error('Missing fields'));
-        }
-      }, 1000);
-    });
+  const signup = async (email, password, name) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Default signup to 'user' role
+      localStorage.setItem('smartpark_user_role', 'user');
+      setUserRole('user');
+      showToast('Account created successfully', 'success');
+      return userCredential.user;
+    } catch (error) {
+      showToast(error.message || 'Failed to create account', 'error');
+      throw error;
+    }
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUserRole(null);
-    setUser(null);
-    localStorage.removeItem('smartpark_auth');
-    showToast('Logged out successfully', 'info');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      showToast('Logged out successfully', 'info');
+    } catch (error) {
+      showToast(error.message || 'Failed to logout', 'error');
+    }
   };
 
   if (loading) {
