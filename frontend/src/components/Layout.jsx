@@ -27,7 +27,7 @@ const Layout = () => {
               <span className="text-sm font-semibold text-slate-600">
                 Welcome, {user?.name}
               </span>
-              <button 
+              <button
                 onClick={logout}
                 className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 transition-all font-bold text-sm"
               >

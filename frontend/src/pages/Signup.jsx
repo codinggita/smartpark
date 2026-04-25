@@ -29,7 +29,7 @@ const Signup = () => {
       alert("Passwords don't match!");
       return;
     }
-    
+
     setIsLoading(true);
     try {
       await signup(formData.email, formData.password, formData.name);

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  BarChart3, 
-  Map as MapIcon, 
-  Calendar, 
-  Users, 
-  Settings, 
-  Search, 
-  Bell, 
+import {
+  LayoutDashboard,
+  BarChart3,
+  Map as MapIcon,
+  Calendar,
+  Users,
+  Settings,
+  Search,
+  Bell,
   HelpCircle,
   Car,
   TrendingUp,
@@ -52,14 +52,14 @@ const Dashboard = () => {
           </div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Intelligent Mobility</p>
         </div>
-        
+
         <nav className="flex-grow px-4 space-y-1.5 mt-4">
           <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} />
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} />
           <NavItem icon={<MapIcon size={20} />} label="Live Map" active={activeTab === 'Live Map'} onClick={() => setActiveTab('Live Map')} />
           <NavItem icon={<Calendar size={20} />} label="Bookings" active={activeTab === 'Bookings'} onClick={() => setActiveTab('Bookings')} />
           <NavItem icon={<Users size={20} />} label="Customer Insights" active={activeTab === 'Customers'} onClick={() => setActiveTab('Customers')} />
-          
+
           <div className="pt-8 pb-2 px-4">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preferences</p>
           </div>
@@ -95,9 +95,9 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
-              <input  
-                type="text" 
-                placeholder="Search metrics, valet IDs..." 
+              <input
+                type="text"
+                placeholder="Search metrics, valet IDs..."
                 className="pl-12 pr-6 py-3 bg-white border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 w-72 text-sm transition-all shadow-sm"
               />
             </div>
@@ -158,11 +158,10 @@ const Dashboard = () => {
             <div className="h-72 w-full flex items-end justify-between gap-3 px-2">
               {[40, 65, 45, 80, 55, 95, 70, 85, 50, 75, 90, 60].map((h, i) => (
                 <div key={i} className="flex-grow group relative">
-                  <div 
-                    style={{ height: `${h}%` }} 
-                    className={`w-full rounded-t-xl transition-all duration-500 group-hover:opacity-80 cursor-pointer ${
-                      i === 5 ? 'bg-indigo-600' : 'bg-slate-200/70'
-                    }`}
+                  <div
+                    style={{ height: `${h}%` }}
+                    className={`w-full rounded-t-xl transition-all duration-500 group-hover:opacity-80 cursor-pointer ${i === 5 ? 'bg-indigo-600' : 'bg-slate-200/70'
+                      }`}
                   ></div>
                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                     {h}%
@@ -187,7 +186,7 @@ const Dashboard = () => {
                   <MapIcon size={20} />
                 </div>
               </div>
-              
+
               <div className="flex-grow flex items-center justify-center">
                 <div className="relative">
                   <div className="w-48 h-48 border-4 border-white/10 rounded-full animate-[spin_20s_linear_infinite]"></div>
@@ -267,11 +266,10 @@ const Dashboard = () => {
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm ${
-                        booking.status === 'Valet' 
-                          ? 'bg-amber-50 text-amber-600 border border-amber-100' 
+                      <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm ${booking.status === 'Valet'
+                          ? 'bg-amber-50 text-amber-600 border border-amber-100'
                           : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                      }`}>
+                        }`}>
                         {booking.status}
                       </span>
                     </td>
@@ -298,13 +296,12 @@ const Dashboard = () => {
 };
 
 const NavItem = ({ icon, label, active = false, onClick }) => (
-  <button 
+  <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3.5 px-5 py-4 rounded-2xl transition-all group ${
-      active 
-        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 translate-x-1' 
+    className={`w-full flex items-center gap-3.5 px-5 py-4 rounded-2xl transition-all group ${active
+        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 translate-x-1'
         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-    }`}
+      }`}
   >
     <span className={`${active ? 'text-white' : 'text-slate-400 group-hover:text-indigo-500'} transition-colors`}>
       {icon}
