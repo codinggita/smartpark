@@ -151,6 +151,7 @@ src/
 
 > [Figma Design Link](https://www.figma.com/design/tcbq1AsxRmYeQGcp6CEE2r/Untitled?node-id=0-1&p=f&t=6yKjmX8wIo0pptUS-0)
 
+> [Figma Prototype Link](https://www.figma.com/proto/tcbq1AsxRmYeQGcp6CEE2r/Untitled?node-id=0-1&t=nc3U0ZOmgrp3w2eI-1)
 ### Application Views
 
 ![View 1](./frontend/src/assets/Screenshot%202026-04-22%20231850.png)
