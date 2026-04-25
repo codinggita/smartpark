@@ -1,13 +1,12 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Car } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import RoleBasedSidebar from './RoleBasedSidebar';
 
 const Layout = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
-  const isDashboard = location.pathname.startsWith('/dashboard');
-
-  // If we are on dashboard, we might not want the default layout navbar 
-  // as the dashboard has its own sidebar. But for now, let's just make it look good.
-  if (isDashboard) return <Outlet />;
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 antialiased">
@@ -23,34 +22,55 @@ const Layout = () => {
         </Link>
 
         <div className="ml-auto flex items-center gap-8">
-          <Link to="/" className="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors">Platform</Link>
-          <Link to="/" className="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors">Pricing</Link>
-          <Link to="/login" className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors">Sign In</Link>
-          <Link to="/signup" className="px-6 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white transition-all font-bold text-sm shadow-xl shadow-slate-200 hover:translate-y-[-2px]">
-            Join Now
-          </Link>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-semibold text-slate-600">
+                Welcome, {user?.name}
+              </span>
+              <button 
+                onClick={logout}
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 transition-all font-bold text-sm"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/" className="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors hidden md:block">Platform</Link>
+              <Link to="/" className="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors hidden md:block">Pricing</Link>
+              <Link to="/login" className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors">Sign In</Link>
+              <Link to="/signup" className="px-6 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white transition-all font-bold text-sm shadow-xl shadow-slate-200 hover:translate-y-[-2px]">
+                Join Now
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="flex-grow pt-20">
-        <Outlet />
-      </main>
+      {/* Main Content with Optional Sidebar */}
+      <div className="flex flex-grow pt-20">
+        {isAuthenticated && !isAuthPage && <RoleBasedSidebar />}
+        <main className="flex-grow">
+          <Outlet />
+        </main>
+      </div>
 
-      {/* Simple Footer */}
-      <footer className="py-12 px-8 lg:px-16 border-t border-slate-100 bg-white">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 opacity-50">
-            <Car size={18} />
-            <span className="text-sm font-bold uppercase tracking-widest">SmartPark &copy; 2026</span>
+      {/* Simple Footer only if not authenticated to keep app-view clean */}
+      {!isAuthenticated && (
+        <footer className="py-12 px-8 lg:px-16 border-t border-slate-100 bg-white">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-2 opacity-50">
+              <Car size={18} />
+              <span className="text-sm font-bold uppercase tracking-widest">SmartPark &copy; 2026</span>
+            </div>
+            <div className="flex items-center gap-8 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>
+              <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>
+              <a href="#" className="hover:text-indigo-600 transition-colors">Contact</a>
+            </div>
           </div>
-          <div className="flex items-center gap-8 text-xs font-bold text-slate-400 uppercase tracking-wider">
-            <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>
-            <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>
-            <a href="#" className="hover:text-indigo-600 transition-colors">Contact</a>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };

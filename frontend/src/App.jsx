@@ -4,17 +4,31 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import MapPage from './pages/MapPage';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-      </Route>
-      <Route path="/dashboard" element={<Dashboard />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
+          {/* Protected Routes for Admin */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
+
+          {/* Protected Routes for User */}
+          <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+            <Route path="/map" element={<MapPage />} />
+          </Route>
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 }
 
