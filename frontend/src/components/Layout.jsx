@@ -4,9 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import RoleBasedSidebar from './RoleBasedSidebar';
 
 const Layout = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, isGuest, user, logout } = useAuth();
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  const isLoggedIn = isAuthenticated || isGuest;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 antialiased">
@@ -22,14 +24,28 @@ const Layout = () => {
         </Link>
 
         <div className="ml-auto flex items-center gap-8">
-          {isAuthenticated ? (
+          {isAuthPage ? null : isLoggedIn ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm font-semibold text-slate-600">
-                Welcome, {user?.name}
-              </span>
+              <div className="flex items-center gap-3">
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-slate-200 shadow-sm" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-slate-800 leading-none">
+                    {user?.name || 'User'}
+                  </span>
+                  {isGuest && (
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Guest Mode</span>
+                  )}
+                </div>
+              </div>
               <button
                 onClick={logout}
-                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 transition-all font-bold text-sm"
+                className="ml-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 transition-all font-bold text-sm"
               >
                 Sign Out
               </button>
@@ -49,14 +65,14 @@ const Layout = () => {
 
       {/* Main Content with Optional Sidebar */}
       <div className="flex flex-grow pt-20">
-        {isAuthenticated && !isAuthPage && <RoleBasedSidebar />}
+        {isLoggedIn && !isAuthPage && <RoleBasedSidebar />}
         <main className="flex-grow">
           <Outlet />
         </main>
       </div>
 
       {/* Simple Footer only if not authenticated to keep app-view clean */}
-      {!isAuthenticated && (
+      {!isLoggedIn && (
         <footer className="py-12 px-8 lg:px-16 border-t border-slate-100 bg-white">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2 opacity-50">

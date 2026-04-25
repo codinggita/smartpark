@@ -1,19 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Snackbar, Alert } from '@mui/material';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null); // 'user' or 'admin'
+  const [isGuest, setIsGuest] = useState(false);
+  const [userRole, setUserRole] = useState(null); // 'user', 'admin', or 'guest'
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,11 +23,11 @@ export const AuthProvider = ({ children }) => {
     setToast({ ...toast, open: false });
   };
 
-  // Listen to Firebase Auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = authService.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setIsAuthenticated(true);
+        setIsGuest(false);
         setUser({
           uid: currentUser.uid,
           email: currentUser.email,
@@ -41,14 +35,20 @@ export const AuthProvider = ({ children }) => {
           photoURL: currentUser.photoURL
         });
         
-        // Retrieve role from local storage since Firebase Auth doesn't store role natively without Firestore/Custom Claims
         const storedRole = localStorage.getItem('smartpark_user_role') || 'user';
         setUserRole(storedRole);
       } else {
-        setIsAuthenticated(false);
-        setUser(null);
-        setUserRole(null);
-        localStorage.removeItem('smartpark_user_role');
+        const checkGuest = localStorage.getItem('smartpark_guest_mode') === 'true';
+        if (checkGuest) {
+          setIsGuest(true);
+          setUserRole('guest');
+          setUser({ name: 'Guest User' });
+        } else {
+          setIsAuthenticated(false);
+          setIsGuest(false);
+          setUser(null);
+          setUserRole(null);
+        }
       }
       setLoading(false);
     });
@@ -58,12 +58,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, role) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Save role for this session
+      const fbUser = await authService.login(email, password);
       localStorage.setItem('smartpark_user_role', role);
+      localStorage.removeItem('smartpark_guest_mode');
       setUserRole(role);
       showToast(`Successfully logged in as ${role}`, 'success');
-      return userCredential.user;
+      return fbUser;
     } catch (error) {
       showToast(error.message || 'Failed to login', 'error');
       throw error;
@@ -72,12 +72,12 @@ export const AuthProvider = ({ children }) => {
 
   const googleLogin = async () => {
     try {
-      const userCredential = await signInWithPopup(auth, googleProvider);
-      // Default Google login to 'user' role
+      const fbUser = await authService.googleLogin();
       localStorage.setItem('smartpark_user_role', 'user');
+      localStorage.removeItem('smartpark_guest_mode');
       setUserRole('user');
-      showToast(`Successfully logged in with Google as ${userCredential.user.displayName}`, 'success');
-      return userCredential.user;
+      showToast(`Successfully logged in with Google as ${fbUser.displayName || 'User'}`, 'success');
+      return fbUser;
     } catch (error) {
       showToast(error.message || 'Google login failed', 'error');
       throw error;
@@ -86,21 +86,37 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (email, password, name) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Default signup to 'user' role
+      const fbUser = await authService.signup(email, password, name);
       localStorage.setItem('smartpark_user_role', 'user');
+      localStorage.removeItem('smartpark_guest_mode');
       setUserRole('user');
       showToast('Account created successfully', 'success');
-      return userCredential.user;
+      return fbUser;
     } catch (error) {
       showToast(error.message || 'Failed to create account', 'error');
       throw error;
     }
   };
 
+  const loginAsGuest = () => {
+    localStorage.setItem('smartpark_guest_mode', 'true');
+    setIsGuest(true);
+    setUserRole('guest');
+    setUser({ name: 'Guest User' });
+    showToast('Continuing as guest', 'info');
+  };
+
   const logout = async () => {
     try {
-      await signOut(auth);
+      if (!isGuest) {
+        await authService.logout();
+      }
+      localStorage.removeItem('smartpark_user_role');
+      localStorage.removeItem('smartpark_guest_mode');
+      setIsGuest(false);
+      setUserRole(null);
+      setUser(null);
+      setIsAuthenticated(false);
       showToast('Logged out successfully', 'info');
     } catch (error) {
       showToast(error.message || 'Failed to logout', 'error');
@@ -112,7 +128,17 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, user, login, googleLogin, signup, logout }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      isGuest, 
+      userRole, 
+      user, 
+      login, 
+      googleLogin, 
+      signup, 
+      loginAsGuest,
+      logout 
+    }}>
       {children}
       <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleCloseToast} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
         <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: '100%' }}>
