@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Login from './pages/Auth/Login';
+import Signup from './pages/Auth/Signup';
 import Dashboard from './pages/Dashboard';
 import MapPage from './pages/MapPage';
 import { AuthProvider } from './context/AuthContext';
@@ -23,7 +23,7 @@ function App() {
           </Route>
 
           {/* Protected Routes for User */}
-          <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['user', 'guest']} />}>
             <Route path="/map" element={<MapPage />} />
           </Route>
         </Route>

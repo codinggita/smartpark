@@ -41,13 +41,13 @@ const Home = () => {
             <div className="lg:w-1/2 relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[3rem] rotate-3 scale-105 opacity-10 group-hover:rotate-6 transition-transform duration-700"></div>
               <div className="relative rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(79,70,229,0.3)] border-8 border-white">
-                <img 
-                  src={heroCar} 
-                  className="w-full h-auto object-cover transform group-hover:scale-110 transition-transform duration-1000" 
-                  alt="Premium SmartPark Car" 
+                <img
+                  src={heroCar}
+                  className="w-full h-auto object-cover transform group-hover:scale-110 transition-transform duration-1000"
+                  alt="Premium SmartPark Car"
                 />
               </div>
-              
+
               {/* Floating Stat Card */}
               <div className="absolute -bottom-10 -left-10 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 hidden md:block animate-pulse">
                 <div className="flex items-center gap-4">
@@ -69,17 +69,17 @@ const Home = () => {
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6 lg:px-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <FeatureCard 
+            <FeatureCard
               icon={<Shield className="text-indigo-600" size={32} />}
               title="Secured Parking"
               desc="Military-grade security surveillance for every reserved spot and valet session."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Zap className="text-indigo-600" size={32} />}
               title="Instant Booking"
               desc="Zero friction. Reserve, pay, and park in under 60 seconds with our optimized flow."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Clock className="text-indigo-600" size={32} />}
               title="Real-time Tracking"
               desc="Watch your valet in real-time. Know exactly where your vehicle is, always."
