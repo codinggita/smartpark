@@ -59,6 +59,19 @@ export const getUserBookings = async (req, res, next) => {
   }
 };
 
+// GET /api/bookings — Get all bookings (Admin)
+export const getAllBookings = async (req, res, next) => {
+  try {
+    const bookings = await Booking.find()
+      .populate('userId', 'displayName email')
+      .populate('zoneId', 'name type')
+      .sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // PATCH /api/bookings/:id/status — Update booking status
 export const updateBookingStatus = async (req, res, next) => {
   try {
