@@ -5,6 +5,8 @@ import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import Dashboard from './pages/Dashboard';
 import MapPage from './pages/MapPage';
+import BookingPage from './pages/BookingPage';
+import ValetTrackingPage from './pages/ValetTrackingPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -25,6 +27,8 @@ function App() {
           {/* Protected Routes for User */}
           <Route element={<ProtectedRoute allowedRoles={['user', 'guest']} />}>
             <Route path="/map" element={<MapPage />} />
+            <Route path="/booking" element={<BookingPage />} />
+            <Route path="/valet" element={<ValetTrackingPage />} />
           </Route>
         </Route>
       </Routes>
