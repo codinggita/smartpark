@@ -19,11 +19,13 @@ import {
   ArrowDownRight,
   Filter
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { bookingService } from '../services/apiService';
 
 const Dashboard = () => {
-  const { user, mongoUser } = useAuth();
+  const { user, mongoUser, userRole } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F1F5F9] font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
-      {/* Sidebar (Existing Sidebar Code) */}
+      {/* Sidebar */}
       <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 hidden lg:flex flex-col sticky top-0 h-screen z-50">
         <div className="p-8">
           <div className="flex items-center gap-3 mb-2">
@@ -73,9 +75,12 @@ const Dashboard = () => {
 
         <nav className="flex-grow px-4 space-y-1.5 mt-4">
           <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} />
+          {userRole === 'admin' && (
+            <NavItem icon={<Settings size={20} />} label="Admin Console" active={activeTab === 'Admin'} onClick={() => navigate('/admin')} />
+          )}
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} />
-          <NavItem icon={<MapIcon size={20} />} label="Live Map" active={activeTab === 'Live Map'} onClick={() => setActiveTab('Live Map')} />
-          <NavItem icon={<Calendar size={20} />} label="Bookings" active={activeTab === 'Bookings'} onClick={() => setActiveTab('Bookings')} />
+          <NavItem icon={<MapIcon size={20} />} label="Live Map" active={activeTab === 'Live Map'} onClick={() => navigate('/map')} />
+          <NavItem icon={<Calendar size={20} />} label="Bookings" active={activeTab === 'Bookings'} onClick={() => navigate('/booking')} />
           <NavItem icon={<Users size={20} />} label="Customer Insights" active={activeTab === 'Customers'} onClick={() => setActiveTab('Customers')} />
 
           <div className="pt-8 pb-2 px-4">
@@ -223,7 +228,10 @@ const Dashboard = () => {
                   </div>
                   <ChevronRight className="text-indigo-300" size={18} />
                 </div>
-                <button className="w-full py-3 bg-white text-indigo-700 font-bold text-sm rounded-2xl hover:bg-indigo-50 transition-colors shadow-lg">
+                <button 
+                  onClick={() => navigate('/map')}
+                  className="w-full py-3 bg-white text-indigo-700 font-bold text-sm rounded-2xl hover:bg-indigo-50 transition-colors shadow-lg"
+                >
                   Explore Full Map
                 </button>
               </div>

@@ -9,6 +9,7 @@ import BookingPage from './pages/BookingPage';
 import PaymentPage from './pages/PaymentPage';
 import ReceiptPage from './pages/ReceiptPage';
 import ValetTrackingPage from './pages/ValetTrackingPage';
+import AdminPage from './pages/AdminPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -24,6 +25,7 @@ function App() {
           {/* Protected Routes for Admin */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Route>
 
           {/* Protected Routes for User */}
