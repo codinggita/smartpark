@@ -3,6 +3,7 @@ import cors from 'cors';
 import parkingZoneRoutes from './routes/parkingZoneRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import valetRoutes from './routes/valetRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
@@ -20,6 +21,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/zones', parkingZoneRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/valet', valetRoutes);
+app.use('/api/users', userRoutes);
 
 // Global Error Handler (must be last)
 app.use(errorHandler);
