@@ -13,11 +13,11 @@ const ReceiptPage = () => {
     return <Navigate to="/booking" replace />;
   }
 
-  const isValet = bookingDetails.zone === 'valet';
+  const isValet = bookingDetails.zoneType === 'valet';
 
   const handleContinue = () => {
     if (isValet) {
-      navigate('/valet');
+      navigate('/valet', { state: { bookingId: bookingDetails._id } });
     } else {
       navigate('/dashboard');
     }

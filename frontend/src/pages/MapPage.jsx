@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { MapPin, Navigation, Car, Search } from 'lucide-react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
+import { parkingService } from '../services/apiService';
 
 const containerStyle = {
   width: '100%',
@@ -19,15 +20,11 @@ const defaultCenter = {
   lng: 78.9629,
 };
 
-// Mock parking markers (Updated to New Delhi area for context)
-const mockMarkers = [
-  { id: 1, lat: 28.6139, lng: 77.2090, title: 'Zone A - Level 1' },
-  { id: 2, lat: 28.6110, lng: 77.2100, title: 'VIP Valet Zone' },
-];
-
 const MapPage = () => {
   const [map, setMap] = useState(null);
   const [searchResultMarker, setSearchResultMarker] = useState(null);
+  const [zones, setZones] = useState([]);
+  const [loading, setLoading] = useState(true);
   const autocompleteRef = useRef(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -35,6 +32,23 @@ const MapPage = () => {
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '', // Provide your API key in .env.local
     libraries,
   });
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const response = await parkingService.getZones();
+        if (response.success) {
+          setZones(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching zones:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchZones();
+  }, []);
 
   const onLoad = useCallback(function callback(map) {
     setMap(map);
@@ -120,12 +134,15 @@ const MapPage = () => {
               fullscreenControl: false,
             }}
           >
-            {/* Render markers for static parking spots */}
-            {mockMarkers.map((marker) => (
+            {/* Render markers for real parking zones */}
+            {zones.map((zone) => (
               <Marker
-                key={marker.id}
-                position={{ lat: marker.lat, lng: marker.lng }}
-                title={marker.title}
+                key={zone._id}
+                position={{ lat: zone.location.lat, lng: zone.location.lng }}
+                title={zone.name}
+                icon={{
+                  url: zone.type === 'valet' ? 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png' : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                }}
               />
             ))}
 
@@ -147,27 +164,36 @@ const MapPage = () => {
           </div>
         )}
 
-        {/* Mock UI Overlays */}
+        {/* Real UI Overlays from DB */}
         <div className="absolute bottom-6 left-6 right-6 md:right-auto md:w-80 bg-white p-5 rounded-2xl shadow-xl shadow-neutral/10 border border-gray-100 z-10 pointer-events-none md:pointer-events-auto">
           <h3 className="font-bold text-neutral-dark flex items-center gap-2 mb-3">
             <Car size={20} className="text-primary" />
-            Nearby Parking (Demo)
+            Nearby Parking
           </h3>
-          <div className="space-y-3 pointer-events-auto">
-            <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-primary/30 transition-colors cursor-pointer">
-              <div>
-                <p className="font-semibold text-sm">Zone A - Level 1</p>
-                <p className="text-xs text-neutral">12 spots available</p>
-              </div>
-              <span className="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded-lg">Open</span>
-            </div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-primary/30 transition-colors cursor-pointer">
-              <div>
-                <p className="font-semibold text-sm">VIP Valet Zone</p>
-                <p className="text-xs text-neutral">3 spots available</p>
-              </div>
-              <span className="text-xs font-bold px-2 py-1 bg-primary/10 text-primary rounded-lg">Premium</span>
-            </div>
+          <div className="space-y-3 pointer-events-auto max-h-60 overflow-y-auto pr-1">
+            {loading ? (
+              <div className="py-4 text-center text-sm text-neutral">Finding zones...</div>
+            ) : zones.length > 0 ? (
+              zones.slice(0, 3).map((zone) => (
+                <div 
+                  key={zone._id}
+                  onClick={() => map && map.panTo({ lat: zone.location.lat, lng: zone.location.lng })}
+                  className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-primary/30 transition-colors cursor-pointer"
+                >
+                  <div>
+                    <p className="font-semibold text-sm">{zone.name}</p>
+                    <p className="text-xs text-neutral">{zone.availableSpots} spots available</p>
+                  </div>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-lg ${
+                    zone.type === 'valet' ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'
+                  }`}>
+                    {zone.type === 'valet' ? 'Valet' : '₹' + zone.pricePerHour}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 text-center text-sm text-neutral">No zones found</div>
+            )}
           </div>
         </div>
       </div>

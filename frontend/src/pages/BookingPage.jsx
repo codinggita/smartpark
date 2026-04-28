@@ -1,23 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Car, CreditCard, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const zones = [
-  { id: 'standard', name: 'Standard Parking', price: 50, icon: <Car size={24} />, description: 'Self-parking in open areas.' },
-  { id: 'premium', name: 'Premium Covered', price: 150, icon: <ShieldCheck size={24} />, description: 'Covered parking near exits.' },
-  { id: 'valet', name: 'VIP Valet Service', price: 300, icon: <Clock size={24} />, description: 'Drop off at the entrance.' },
-];
+import { parkingService, bookingService } from '../services/apiService';
 
 const BookingPage = () => {
   const navigate = useNavigate();
+  const [zones, setZones] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     licensePlate: '',
     date: '',
     time: '',
-    zone: 'standard',
+    zone: '', // This will be the zone _id
     duration: 1, // hours
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const response = await parkingService.getZones();
+        if (response.success) {
+          setZones(response.data);
+          // Set default zone to the first one available
+          if (response.data.length > 0) {
+            setFormData(prev => ({ ...prev, zone: response.data[0]._id }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching zones:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchZones();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,25 +45,57 @@ const BookingPage = () => {
   };
 
   const calculateTotal = () => {
-    const selectedZone = zones.find(z => z.id === formData.zone);
-    return selectedZone ? selectedZone.price * formData.duration : 0;
+    const selectedZone = zones.find(z => z._id === formData.zone);
+    return selectedZone ? selectedZone.pricePerHour * formData.duration : 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate processing
-    setTimeout(() => {
-      setIsSubmitting(false);
+    
+    try {
       const totalAmount = calculateTotal();
-      const selectedZoneName = zones.find(z => z.id === formData.zone)?.name;
-      // Navigate to Payment page, passing booking details via state
-      navigate('/payment', { 
-        state: { 
-          bookingDetails: { ...formData, totalAmount, zoneName: selectedZoneName } 
-        } 
-      });
-    }, 1000);
+      const selectedZone = zones.find(z => z._id === formData.zone);
+      
+      const bookingData = {
+        zoneId: formData.zone,
+        licensePlate: formData.licensePlate,
+        date: formData.date,
+        time: formData.time,
+        duration: parseInt(formData.duration),
+        totalAmount,
+      };
+
+      const response = await bookingService.createBooking(bookingData);
+      
+      if (response.success) {
+        // Navigate to Payment page, passing booking details via state
+        navigate('/payment', { 
+          state: { 
+            bookingDetails: { 
+              ...formData, 
+              _id: response.data._id,
+              totalAmount, 
+              zoneName: selectedZone?.name,
+              zoneType: selectedZone?.type
+            } 
+          } 
+        });
+      }
+    } catch (error) {
+      console.error('Booking failed:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getZoneIcon = (type) => {
+    switch (type) {
+      case 'premium': return <ShieldCheck size={24} />;
+      case 'valet': return <Clock size={24} />;
+      default: return <Car size={24} />;
+    }
   };
 
   return (
@@ -128,25 +177,29 @@ const BookingPage = () => {
               <ShieldCheck className="text-primary" size={24} />
               Select Zone
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {zones.map((zone) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {loading ? (
+                Array(3).fill(0).map((_, i) => (
+                  <div key={i} className="h-40 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
+                ))
+              ) : zones.map((zone) => (
                 <div
-                  key={zone.id}
-                  onClick={() => handleZoneSelect(zone.id)}
+                  key={zone._id}
+                  onClick={() => handleZoneSelect(zone._id)}
                   className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                    formData.zone === zone.id
+                    formData.zone === zone._id
                       ? 'border-primary bg-primary/5 shadow-md'
                       : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                    formData.zone === zone.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600'
+                    formData.zone === zone._id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {zone.icon}
+                    {getZoneIcon(zone.type)}
                   </div>
                   <h3 className="font-bold text-neutral-dark">{zone.name}</h3>
-                  <p className="text-xs text-neutral mt-1">{zone.description}</p>
-                  <div className="mt-3 font-bold text-lg text-primary">₹{zone.price}/hr</div>
+                  <p className="text-xs text-neutral mt-1">{zone.availableSpots} spots left</p>
+                  <div className="mt-3 font-bold text-lg text-primary">₹{zone.pricePerHour}/hr</div>
                 </div>
               ))}
             </div>
@@ -161,7 +214,9 @@ const BookingPage = () => {
             <div className="space-y-4 mb-8">
               <div className="flex justify-between items-center pb-4 border-b border-white/10">
                 <span className="text-white/70">Zone</span>
-                <span className="font-semibold">{zones.find(z => z.id === formData.zone)?.name}</span>
+                <span className="font-semibold text-right">
+                  {zones.find(z => z._id === formData.zone)?.name || 'Not selected'}
+                </span>
               </div>
               <div className="flex justify-between items-center pb-4 border-b border-white/10">
                 <span className="text-white/70">Duration</span>
@@ -179,7 +234,7 @@ const BookingPage = () => {
 
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || !formData.licensePlate || !formData.date || !formData.time}
+              disabled={isSubmitting || loading || !formData.licensePlate || !formData.date || !formData.time}
               className="w-full py-4 bg-primary hover:bg-primary-hover disabled:bg-primary/50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors group"
             >
               {isSubmitting ? (
@@ -193,7 +248,7 @@ const BookingPage = () => {
               )}
             </button>
             <p className="text-center text-xs text-white/50 mt-4">
-              Secure payment processing. You will not be charged until arrival.
+              Secure booking. You will be redirected to the payment gateway.
             </p>
           </div>
         </div>
