@@ -6,6 +6,8 @@ import Signup from './pages/Auth/Signup';
 import Dashboard from './pages/Dashboard';
 import MapPage from './pages/MapPage';
 import BookingPage from './pages/BookingPage';
+import PaymentPage from './pages/PaymentPage';
+import ReceiptPage from './pages/ReceiptPage';
 import ValetTrackingPage from './pages/ValetTrackingPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,6 +30,8 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['user', 'guest']} />}>
             <Route path="/map" element={<MapPage />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/receipt" element={<ReceiptPage />} />
             <Route path="/valet" element={<ValetTrackingPage />} />
           </Route>
         </Route>

@@ -35,16 +35,18 @@ const BookingPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
+    // Simulate processing
     setTimeout(() => {
       setIsSubmitting(false);
-      // If valet, navigate to valet tracking, else maybe to dashboard or map
-      if (formData.zone === 'valet') {
-        navigate('/valet');
-      } else {
-        navigate('/dashboard');
-      }
-    }, 1500);
+      const totalAmount = calculateTotal();
+      const selectedZoneName = zones.find(z => z.id === formData.zone)?.name;
+      // Navigate to Payment page, passing booking details via state
+      navigate('/payment', { 
+        state: { 
+          bookingDetails: { ...formData, totalAmount, zoneName: selectedZoneName } 
+        } 
+      });
+    }, 1000);
   };
 
   return (
