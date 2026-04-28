@@ -1,37 +1,159 @@
-import React from 'react';
-import { MapPin, Navigation, Car } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { MapPin, Navigation, Car, Search } from 'lucide-react';
+import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
+
+const containerStyle = {
+  width: '100%',
+  height: '100%',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+};
+
+// Define libraries outside the component to avoid re-renders
+const libraries = ['places'];
+
+// Default center: Center of India
+const defaultCenter = {
+  lat: 20.5937,
+  lng: 78.9629,
+};
+
+// Mock parking markers (Updated to New Delhi area for context)
+const mockMarkers = [
+  { id: 1, lat: 28.6139, lng: 77.2090, title: 'Zone A - Level 1' },
+  { id: 2, lat: 28.6110, lng: 77.2100, title: 'VIP Valet Zone' },
+];
 
 const MapPage = () => {
+  const [map, setMap] = useState(null);
+  const [searchResultMarker, setSearchResultMarker] = useState(null);
+  const autocompleteRef = useRef(null);
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '', // Provide your API key in .env.local
+    libraries,
+  });
+
+  const onLoad = useCallback(function callback(map) {
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
+  const onLoadAutocomplete = (autocomplete) => {
+    autocompleteRef.current = autocomplete;
+  };
+
+  const onPlaceChanged = () => {
+    if (autocompleteRef.current !== null) {
+      const place = autocompleteRef.current.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const location = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        };
+        setSearchResultMarker(location);
+        map.panTo(location);
+        map.setZoom(15);
+      }
+    } else {
+      console.log('Autocomplete is not loaded yet!');
+    }
+  };
+
   return (
     <div className="h-full flex flex-col p-6">
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-neutral-dark">Live Map</h1>
-          <p className="text-neutral mt-1">Find parking spots and track your valet</p>
+          <p className="text-neutral mt-1">Search locations and find parking spots</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center gap-2 text-sm font-semibold text-neutral-dark hover:bg-gray-50 transition-colors">
+          <button 
+            className="px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center gap-2 text-sm font-semibold text-neutral-dark hover:bg-gray-50 transition-colors"
+            onClick={() => {
+              if (map) {
+                map.panTo(defaultCenter);
+                map.setZoom(5);
+                setSearchResultMarker(null);
+              }
+            }}
+          >
             <Navigation size={18} className="text-primary" />
-            Current Location
+            Reset View
           </button>
         </div>
       </div>
 
-      <div className="flex-grow bg-slate-200 rounded-3xl overflow-hidden relative shadow-inner border border-gray-200 flex flex-col items-center justify-center min-h-[500px]">
-        {/* Placeholder for actual Google Maps implementation */}
-        <MapPin size={48} className="text-primary mb-4 animate-bounce" />
-        <h2 className="text-xl font-bold text-slate-600">Map View Simulator</h2>
-        <p className="text-slate-500 max-w-md text-center mt-2">
-          In a full implementation, this area would render the Google Maps API showing available parking spots, your vehicle location, and valet tracking.
-        </p>
+      <div className="flex-grow bg-slate-200 rounded-3xl overflow-hidden relative shadow-inner border border-gray-200 flex flex-col min-h-[500px]">
+        {/* Search Bar Overlay */}
+        {isLoaded && (
+          <div className="absolute top-6 left-6 right-6 md:left-1/2 md:-translate-x-1/2 md:w-[400px] z-10">
+            <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for any location..."
+                  className="w-full h-12 pl-12 pr-4 bg-white border border-gray-200 rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral" />
+              </div>
+            </Autocomplete>
+          </div>
+        )}
+
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={defaultCenter}
+            zoom={5} // Initial zoom level for the country view
+            onLoad={onLoad}
+            onUnmount={onUnmount}
+            options={{
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+            }}
+          >
+            {/* Render markers for static parking spots */}
+            {mockMarkers.map((marker) => (
+              <Marker
+                key={marker.id}
+                position={{ lat: marker.lat, lng: marker.lng }}
+                title={marker.title}
+              />
+            ))}
+
+            {/* Render marker for searched location */}
+            {searchResultMarker && (
+              <Marker
+                position={searchResultMarker}
+                title="Searched Location"
+                icon={{
+                  url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' // Different color for search
+                }}
+              />
+            )}
+          </GoogleMap>
+        ) : (
+          <div className="flex-grow flex flex-col items-center justify-center relative z-0">
+            <MapPin size={48} className="text-primary mb-4 animate-bounce" />
+            <h2 className="text-xl font-bold text-slate-600">Loading Map...</h2>
+          </div>
+        )}
 
         {/* Mock UI Overlays */}
-        <div className="absolute bottom-6 left-6 right-6 md:right-auto md:w-80 bg-white p-5 rounded-2xl shadow-xl shadow-neutral/10 border border-gray-100 z-10">
+        <div className="absolute bottom-6 left-6 right-6 md:right-auto md:w-80 bg-white p-5 rounded-2xl shadow-xl shadow-neutral/10 border border-gray-100 z-10 pointer-events-none md:pointer-events-auto">
           <h3 className="font-bold text-neutral-dark flex items-center gap-2 mb-3">
             <Car size={20} className="text-primary" />
-            Nearby Parking
+            Nearby Parking (Demo)
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-3 pointer-events-auto">
             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-primary/30 transition-colors cursor-pointer">
               <div>
                 <p className="font-semibold text-sm">Zone A - Level 1</p>
