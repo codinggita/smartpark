@@ -1,28 +1,71 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, Navigate } from 'react-router-dom';
 import { Car, MapPin, PhoneCall, Star, CheckCircle2, Clock, Navigation } from 'lucide-react';
+import { valetService } from '../services/apiService';
 
 const trackingSteps = [
-  { id: 1, title: 'Request Received', description: 'We are locating a valet for you.' },
-  { id: 2, title: 'Valet Assigned', description: 'Rahul is on his way to your location.' },
-  { id: 3, title: 'Vehicle Picked Up', description: 'Your car is being driven to the VIP zone.' },
-  { id: 4, title: 'Parked Safely', description: 'Your car is secure in Zone A.' },
+  { id: 1, title: 'Request Received', description: 'We are locating a valet for you.', status: 'received' },
+  { id: 2, title: 'Valet Assigned', description: 'Rahul is on his way to your location.', status: 'assigned' },
+  { id: 3, title: 'Vehicle Picked Up', description: 'Your car is being driven to the VIP zone.', status: 'picked_up' },
+  { id: 4, title: 'Parked Safely', description: 'Your car is secure in Zone A.', status: 'parked' },
 ];
 
 const ValetTrackingPage = () => {
+  const location = useLocation();
+  const bookingId = location.state?.bookingId;
   const [currentStep, setCurrentStep] = useState(1);
   const [eta, setEta] = useState(5);
+  const [bookingData, setBookingData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Simulate tracking progression
+  if (!bookingId) {
+    return <Navigate to="/booking" replace />;
+  }
+
   useEffect(() => {
-    if (currentStep >= trackingSteps.length) return;
+    const fetchStatus = async () => {
+      try {
+        const response = await valetService.getValetStatus(bookingId);
+        if (response.success) {
+          const status = response.data.status;
+          const stepIndex = trackingSteps.findIndex(s => s.status === status);
+          if (stepIndex !== -1) {
+            setCurrentStep(stepIndex + 1);
+          }
+          setBookingData(response.data.bookingId);
+          setEta(response.data.eta || 5);
+        }
+      } catch (error) {
+        console.error('Error fetching valet status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatus();
+    // In a real app, you might poll here or use WebSockets
+  }, [bookingId]);
+
+  // For the demo, we'll still keep the auto-progression simulation if you want, 
+  // but let's make it fetch real data initially.
+  useEffect(() => {
+    if (loading || currentStep >= trackingSteps.length) return;
 
     const timer = setTimeout(() => {
       setCurrentStep(prev => prev + 1);
       setEta(prev => Math.max(0, prev - 1));
-    }, 4000); // Progress every 4 seconds for demo purposes
+    }, 6000);
 
     return () => clearTimeout(timer);
-  }, [currentStep]);
+  }, [currentStep, loading]);
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto">
@@ -55,7 +98,7 @@ const ValetTrackingPage = () => {
             </div>
 
             <div className="relative pl-8 space-y-8 before:absolute before:inset-0 before:ml-10 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-              {trackingSteps.map((step, index) => {
+              {trackingSteps.map((step) => {
                 const isCompleted = currentStep > step.id;
                 const isCurrent = currentStep === step.id;
                 
@@ -121,7 +164,9 @@ const ValetTrackingPage = () => {
             </h3>
             <div className="bg-white/10 rounded-2xl p-4 flex flex-col items-center justify-center">
               <p className="text-xs text-white/60 uppercase tracking-wider mb-1">License Plate</p>
-              <h2 className="text-2xl font-mono font-bold tracking-widest text-accent">DL01 AB1234</h2>
+              <h2 className="text-2xl font-mono font-bold tracking-widest text-accent uppercase">
+                {bookingData?.licensePlate || 'Loading...'}
+              </h2>
             </div>
             
             <div className="mt-6 space-y-3 text-sm">
@@ -131,11 +176,11 @@ const ValetTrackingPage = () => {
               </div>
               <div className="flex justify-between items-center border-b border-white/10 pb-2">
                 <span className="text-white/60">Request Time</span>
-                <span className="font-semibold">Today, 2:45 PM</span>
+                <span className="font-semibold">{bookingData?.time || 'Pending'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-white/60">Booking ID</span>
-                <span className="font-mono text-white/80">#SP-9824A</span>
+                <span className="font-mono text-white/80">#{bookingId.slice(-6).toUpperCase()}</span>
               </div>
             </div>
           </div>
