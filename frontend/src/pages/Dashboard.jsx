@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   BarChart3,
@@ -19,27 +19,45 @@ import {
   ArrowDownRight,
   Filter
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { bookingService } from '../services/apiService';
 
 const Dashboard = () => {
+  const { user, mongoUser } = useAuth();
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (mongoUser?._id) {
+        try {
+          const response = await bookingService.getUserBookings(mongoUser._id);
+          if (response.success) {
+            setRecentBookings(response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching bookings:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, [mongoUser]);
 
   const stats = [
     { label: 'System Capacity', value: '500', icon: <Car size={22} />, sub: 'Total Spots', color: 'text-indigo-600', bg: 'bg-indigo-50/50', trend: '+2.5%', trendUp: true },
     { label: 'Available Now', value: '142', icon: <CheckCircle2 size={22} />, sub: 'Real-time', color: 'text-emerald-600', bg: 'bg-emerald-50/50', trend: '-4.1%', trendUp: false },
-    { label: 'Active Sessions', value: '358', icon: <AlertCircle size={22} />, sub: 'Current', color: 'text-rose-600', bg: 'bg-rose-50/50', trend: '+12%', trendUp: true },
-    { label: 'Daily Revenue', value: '$2,450', icon: <TrendingUp size={22} />, sub: 'Net Earnings', color: 'text-amber-600', bg: 'bg-amber-50/50', trend: '+8.4%', trendUp: true },
-  ];
-
-  const recentBookings = [
-    { id: '#BK-8821', user: 'Michael Chen', spot: 'A1-042', status: 'Self-Park', time: '10:24 AM', revenue: '$12.50', avatar: 'https://i.pravatar.cc/150?u=michael' },
-    { id: '#BK-8820', user: 'Sarah Jenkins', spot: 'V-105', status: 'Valet', time: '09:15 AM', revenue: '$35.00', avatar: 'https://i.pravatar.cc/150?u=sarah' },
-    { id: '#BK-8819', user: 'Emily Davis', spot: 'B2-011', status: 'Self-Park', time: '08:45 AM', revenue: '$18.00', avatar: 'https://i.pravatar.cc/150?u=emily' },
-    { id: '#BK-8818', user: 'Robert Johnson', spot: 'C1-088', status: 'Self-Park', time: '08:12 AM', revenue: '$15.00', avatar: 'https://i.pravatar.cc/150?u=robert' },
+    { label: 'Active Sessions', value: recentBookings.length.toString(), icon: <AlertCircle size={22} />, sub: 'Your Bookings', color: 'text-rose-600', bg: 'bg-rose-50/50', trend: '+12%', trendUp: true },
+    { label: 'Total Spent', value: `₹${recentBookings.reduce((acc, b) => acc + (b.totalAmount || 0), 0)}`, icon: <TrendingUp size={22} />, sub: 'Net Spend', color: 'text-amber-600', bg: 'bg-amber-50/50', trend: '+8.4%', trendUp: true },
   ];
 
   return (
     <div className="flex min-h-screen bg-[#F1F5F9] font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
-      {/* Sidebar */}
+      {/* Sidebar (Existing Sidebar Code) */}
       <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 hidden lg:flex flex-col sticky top-0 h-screen z-50">
         <div className="p-8">
           <div className="flex items-center gap-3 mb-2">
@@ -86,7 +104,7 @@ const Dashboard = () => {
           <div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-1">Executive Overview</h2>
             <div className="flex items-center gap-2 text-sm text-slate-500">
-              <span className="flex items-center gap-1.5"><Calendar size={14} /> Friday, 24 April 2026</span>
+              <span className="flex items-center gap-1.5"><Calendar size={14} /> {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
               <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
               <span className="text-indigo-600 font-semibold">System Online</span>
             </div>
@@ -107,10 +125,10 @@ const Dashboard = () => {
             </button>
             <div className="flex items-center gap-3 pl-2">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-slate-800">Nishit D.</p>
-                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Fleet Manager</p>
+                <p className="text-sm font-black text-slate-800">{user?.name || 'Guest User'}</p>
+                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">{mongoUser?.role || 'Member'}</p>
               </div>
-              <img src="https://i.pravatar.cc/150?u=nishit" className="w-12 h-12 rounded-2xl border-2 border-white shadow-md object-cover" alt="User" />
+              <img src={user?.photoURL || `https://i.pravatar.cc/150?u=${user?.uid || 'guest'}`} className="w-12 h-12 rounded-2xl border-2 border-white shadow-md object-cover" alt="User" />
             </div>
           </div>
         </header>
@@ -217,8 +235,8 @@ const Dashboard = () => {
         <div className="bg-white rounded-[2.5rem] border border-white/60 shadow-xl shadow-slate-200/50 overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h4 className="text-xl font-black text-slate-900 tracking-tight">Active Operations</h4>
-              <p className="text-sm text-slate-500">Live feed of all parking and valet activity</p>
+              <h4 className="text-xl font-black text-slate-900 tracking-tight">Your Recent Bookings</h4>
+              <p className="text-sm text-slate-500">Live feed of your parking activity</p>
             </div>
             <div className="flex items-center gap-3">
               <button className="px-5 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-900/20">
@@ -233,54 +251,64 @@ const Dashboard = () => {
             <table className="w-full text-left">
               <thead className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 <tr>
-                  <th className="px-8 py-5">Transaction ID</th>
-                  <th className="px-8 py-5">Operator / Customer</th>
-                  <th className="px-8 py-5">Assigned Spot</th>
-                  <th className="px-8 py-5">Mode</th>
-                  <th className="px-8 py-5">Entry Time</th>
-                  <th className="px-8 py-5 text-right">Fee</th>
+                  <th className="px-8 py-5">Booking ID</th>
+                  <th className="px-8 py-5">Vehicle / License</th>
+                  <th className="px-8 py-5">Parking Zone</th>
+                  <th className="px-8 py-5">Status</th>
+                  <th className="px-8 py-5">Date & Time</th>
+                  <th className="px-8 py-5 text-right">Fee Paid</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {recentBookings.map((booking, i) => (
-                  <tr key={i} className="group hover:bg-indigo-50/30 transition-all cursor-pointer">
-                    <td className="px-8 py-5">
-                      <span className="text-xs font-black text-slate-400 group-hover:text-indigo-600 transition-colors">{booking.id}</span>
-                    </td>
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <img src={booking.avatar} className="w-10 h-10 rounded-xl border-2 border-white shadow-sm object-cover" alt={booking.user} />
-                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
-                        </div>
-                        <div>
-                          <p className="text-sm font-black text-slate-800">{booking.user}</p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Premium Member</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                        <span className="text-sm font-bold text-slate-700">{booking.spot}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5">
-                      <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm ${booking.status === 'Valet'
-                          ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                          : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                        }`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5">
-                      <span className="text-sm text-slate-500 font-bold">{booking.time}</span>
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                      <span className="text-sm font-black text-slate-900">{booking.revenue}</span>
-                    </td>
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="px-8 py-10 text-center text-slate-400 font-bold">Loading your activity...</td>
                   </tr>
-                ))}
+                ) : recentBookings.length > 0 ? (
+                  recentBookings.map((booking, i) => (
+                    <tr key={i} className="group hover:bg-indigo-50/30 transition-all cursor-pointer">
+                      <td className="px-8 py-5">
+                        <span className="text-xs font-black text-slate-400 group-hover:text-indigo-600 transition-colors">#{booking._id.slice(-6).toUpperCase()}</span>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+                            <Car size={20} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-slate-800">{booking.licensePlate}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verified Vehicle</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                          <span className="text-sm font-bold text-slate-700">{booking.zoneId?.name || 'Assigned Zone'}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                          booking.status === 'confirmed'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                            : 'bg-amber-50 text-amber-600 border border-amber-100'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5">
+                        <span className="text-sm text-slate-500 font-bold">{booking.date} at {booking.time}</span>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <span className="text-sm font-black text-slate-900">₹{booking.totalAmount}</span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-8 py-10 text-center text-slate-400 font-bold">No recent bookings found.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -46,4 +46,15 @@ export const valetService = {
   },
 };
 
+export const userService = {
+  syncUser: async (userData) => {
+    const response = await api.post('/users/sync', userData);
+    return response.data;
+  },
+  getUser: async (firebaseUid) => {
+    const response = await api.get(`/users/${firebaseUid}`);
+    return response.data;
+  },
+};
+
 export default api;

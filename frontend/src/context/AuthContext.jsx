@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Snackbar, Alert } from '@mui/material';
 import { authService } from '../services/authService';
+import { userService } from '../services/apiService';
 
 const AuthContext = createContext();
 
@@ -9,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isGuest, setIsGuest] = useState(false);
   const [userRole, setUserRole] = useState(null); // 'user', 'admin', or 'guest'
   const [user, setUser] = useState(null);
+  const [mongoUser, setMongoUser] = useState(null); // The user record from our MongoDB
   const [loading, setLoading] = useState(true);
 
   // Toast state
@@ -23,8 +25,24 @@ export const AuthProvider = ({ children }) => {
     setToast({ ...toast, open: false });
   };
 
+  const syncUserToMongo = async (fbUser, role) => {
+    try {
+      const response = await userService.syncUser({
+        firebaseUid: fbUser.uid,
+        email: fbUser.email,
+        displayName: fbUser.displayName || fbUser.email.split('@')[0],
+        role: role || 'user'
+      });
+      if (response.success) {
+        setMongoUser(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to sync user to MongoDB:', error);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChanged((currentUser) => {
+    const unsubscribe = authService.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setIsAuthenticated(true);
         setIsGuest(false);
@@ -37,6 +55,20 @@ export const AuthProvider = ({ children }) => {
         
         const storedRole = localStorage.getItem('smartpark_user_role') || 'user';
         setUserRole(storedRole);
+        
+        // Fetch mongo user record
+        try {
+          const response = await userService.getUser(currentUser.uid);
+          if (response.success) {
+            setMongoUser(response.data);
+          } else {
+            // If not found, sync it
+            await syncUserToMongo(currentUser, storedRole);
+          }
+        } catch (error) {
+          // Fallback sync
+          await syncUserToMongo(currentUser, storedRole);
+        }
       } else {
         const checkGuest = localStorage.getItem('smartpark_guest_mode') === 'true';
         if (checkGuest) {
@@ -47,6 +79,7 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(false);
           setIsGuest(false);
           setUser(null);
+          setMongoUser(null);
           setUserRole(null);
         }
       }
@@ -62,6 +95,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('smartpark_user_role', role);
       localStorage.removeItem('smartpark_guest_mode');
       setUserRole(role);
+      await syncUserToMongo(fbUser, role);
       showToast(`Successfully logged in as ${role}`, 'success');
       return fbUser;
     } catch (error) {
@@ -76,6 +110,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('smartpark_user_role', 'user');
       localStorage.removeItem('smartpark_guest_mode');
       setUserRole('user');
+      await syncUserToMongo(fbUser, 'user');
       showToast(`Successfully logged in with Google as ${fbUser.displayName || 'User'}`, 'success');
       return fbUser;
     } catch (error) {
@@ -90,6 +125,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('smartpark_user_role', 'user');
       localStorage.removeItem('smartpark_guest_mode');
       setUserRole('user');
+      await syncUserToMongo(fbUser, 'user');
       showToast('Account created successfully', 'success');
       return fbUser;
     } catch (error) {
@@ -133,6 +169,7 @@ export const AuthProvider = ({ children }) => {
       isGuest, 
       userRole, 
       user, 
+      mongoUser,
       login, 
       googleLogin, 
       signup, 
