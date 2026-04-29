@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { MapPin, Navigation, Car, Search } from 'lucide-react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import { parkingService } from '../services/apiService';
@@ -81,6 +82,12 @@ const MapPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6">
+      <Helmet>
+        <title>Live Parking Map — SmartPark</title>
+        <meta name="description" content="View real-time parking availability on the map. Find and reserve parking spots near you instantly." />
+        <meta property="og:title" content="Live Parking Map — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/map" />
+      </Helmet>
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-neutral-dark">Live Map</h1>

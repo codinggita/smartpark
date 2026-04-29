@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Users, 
   BarChart3, 
@@ -72,6 +73,12 @@ const AdminPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto bg-slate-50/50">
+      <Helmet>
+        <title>Admin Console — SmartPark</title>
+        <meta name="description" content="SmartPark admin console. Manage platform-wide parking operations, bookings, and revenue." />
+        <meta property="og:title" content="Admin Console — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/admin" />
+      </Helmet>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Admin Console</h1>

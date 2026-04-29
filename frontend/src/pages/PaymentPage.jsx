@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { ShieldCheck, Smartphone, CheckCircle, CreditCard, Lock } from 'lucide-react';
 
@@ -45,6 +46,12 @@ const PaymentPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto">
+      <Helmet>
+        <title>Secure Payment — SmartPark</title>
+        <meta name="description" content="Complete your parking booking payment securely via UPI, GPay, PhonePe or Paytm." />
+        <meta property="og:title" content="Secure Payment — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/payment" />
+      </Helmet>
       <div className="max-w-3xl mx-auto w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-neutral-dark">Secure Payment</h1>

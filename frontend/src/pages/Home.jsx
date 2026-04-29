@@ -1,10 +1,18 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, Clock, Zap } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import heroCar from '../assets/hero_car.png';
 
 const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      <Helmet>
+        <title>SmartPark — Smart Parking & Valet Visibility</title>
+        <meta name="description" content="End the cycle of circling. SmartPark delivers real-time parking availability and premium valet services in 50+ cities." />
+        <meta property="og:title" content="SmartPark — Smart Parking & Valet Visibility" />
+        <meta property="og:description" content="Real-time parking availability, instant booking, and live valet tracking." />
+        <meta property="og:url" content="https://smartpark.app/" />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 overflow-hidden">
         <div className="container mx-auto px-6 lg:px-16 relative z-10">
