@@ -6,13 +6,22 @@ export const syncUser = async (req, res, next) => {
   try {
     const { firebaseUid, email, displayName, role } = req.body;
 
-    let user = await User.findOne({ firebaseUid });
+    let user = await User.findOne({ 
+      $or: [{ firebaseUid }, { email }] 
+    });
 
     if (user) {
       // Update existing user
+      user.firebaseUid = firebaseUid; // Link UID if it was missing
       user.email = email || user.email;
       user.displayName = displayName || user.displayName;
-      if (role) user.role = role;
+      
+      // Prevent downgrading from admin to user
+      if (role === 'admin') {
+        user.role = 'admin';
+      }
+      // If role is user but they are already admin, keep them as admin
+      
       await user.save();
     } else {
       // Create new user
