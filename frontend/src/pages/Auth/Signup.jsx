@@ -35,7 +35,8 @@ const Signup = () => {
       await signup(values.email, values.password, values.name);
       navigate(from, { replace: true });
     } catch (error) {
-      setStatus('Failed to create account. Please try again.');
+      console.error('Signup error:', error);
+      setStatus(error.message || 'Failed to create account. Please try again.');
     } finally {
       setSubmitting(false);
     }

@@ -29,7 +29,8 @@ const Login = () => {
       await login(values.email, values.password, role);
       navigate(from, { replace: true });
     } catch (error) {
-      setStatus('Invalid credentials. Please try again.');
+      console.error('Login error:', error);
+      setStatus(error.message || 'Invalid credentials. Please try again.');
     } finally {
       setSubmitting(false);
     }
