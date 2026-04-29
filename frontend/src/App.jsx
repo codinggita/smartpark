@@ -15,6 +15,8 @@ const PaymentPage      = lazy(() => import('./pages/PaymentPage'));
 const ReceiptPage      = lazy(() => import('./pages/ReceiptPage'));
 const ValetTrackingPage = lazy(() => import('./pages/ValetTrackingPage'));
 const AdminPage        = lazy(() => import('./pages/AdminPage'));
+const Settings         = lazy(() => import('./pages/Settings'));
+
 
 // ─── Suspense fallback ────────────────────────────────────────────────────────
 const PageLoader = () => (
@@ -49,6 +51,7 @@ function App() {
               <Route path="/payment" element={<PaymentPage />} />
               <Route path="/receipt" element={<ReceiptPage />} />
               <Route path="/valet" element={<ValetTrackingPage />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
           </Route>
         </Routes>
