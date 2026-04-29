@@ -1,45 +1,61 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import Home from './pages/Home';
-import Login from './pages/Auth/Login';
-import Signup from './pages/Auth/Signup';
-import Dashboard from './pages/Dashboard';
-import MapPage from './pages/MapPage';
-import BookingPage from './pages/BookingPage';
-import PaymentPage from './pages/PaymentPage';
-import ReceiptPage from './pages/ReceiptPage';
-import ValetTrackingPage from './pages/ValetTrackingPage';
-import AdminPage from './pages/AdminPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+
+// ─── Lazy-loaded pages ────────────────────────────────────────────────────────
+const Home             = lazy(() => import('./pages/Home'));
+const Login            = lazy(() => import('./pages/Auth/Login'));
+const Signup           = lazy(() => import('./pages/Auth/Signup'));
+const Dashboard        = lazy(() => import('./pages/Dashboard'));
+const MapPage          = lazy(() => import('./pages/MapPage'));
+const BookingPage      = lazy(() => import('./pages/BookingPage'));
+const PaymentPage      = lazy(() => import('./pages/PaymentPage'));
+const ReceiptPage      = lazy(() => import('./pages/ReceiptPage'));
+const ValetTrackingPage = lazy(() => import('./pages/ValetTrackingPage'));
+const AdminPage        = lazy(() => import('./pages/AdminPage'));
+
+// ─── Suspense fallback ────────────────────────────────────────────────────────
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+      <p className="text-sm font-semibold text-slate-400 tracking-wide">Loading…</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          
-          {/* Protected Routes for Admin */}
-          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin" element={<AdminPage />} />
-          </Route>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Routes for User */}
-          <Route element={<ProtectedRoute allowedRoles={['user', 'guest']} />}>
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/booking" element={<BookingPage />} />
-            <Route path="/payment" element={<PaymentPage />} />
-            <Route path="/receipt" element={<ReceiptPage />} />
-            <Route path="/valet" element={<ValetTrackingPage />} />
+            {/* Protected Routes for Admin */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
+
+            {/* Protected Routes for User */}
+            <Route element={<ProtectedRoute allowedRoles={['user', 'guest']} />}>
+              <Route path="/map" element={<MapPage />} />
+              <Route path="/booking" element={<BookingPage />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route path="/receipt" element={<ReceiptPage />} />
+              <Route path="/valet" element={<ValetTrackingPage />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </Suspense>
     </AuthProvider>
   );
 }
 
 export default App;
+
