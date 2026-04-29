@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useLocation, Navigate } from 'react-router-dom';
 import { Car, MapPin, PhoneCall, Star, CheckCircle2, Clock, Navigation } from 'lucide-react';
 import { valetService } from '../services/apiService';
@@ -69,6 +70,12 @@ const ValetTrackingPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto">
+      <Helmet>
+        <title>Valet Tracking — SmartPark</title>
+        <meta name="description" content="Track your valet in real-time. See live status updates of your vehicle from pickup to parking." />
+        <meta property="og:title" content="Valet Tracking — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/valet" />
+      </Helmet>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-neutral-dark">Valet Tracking</h1>
         <p className="text-neutral mt-1">Real-time updates on your vehicle</p>

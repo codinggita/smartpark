@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, Car, CreditCard, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { parkingService, bookingService } from '../services/apiService';
@@ -100,6 +101,12 @@ const BookingPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto">
+      <Helmet>
+        <title>Reserve a Parking Spot — SmartPark</title>
+        <meta name="description" content="Book your parking spot or valet service in advance. Choose your zone, date, and duration." />
+        <meta property="og:title" content="Reserve a Spot — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/booking" />
+      </Helmet>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-neutral-dark">Reserve a Spot</h1>
         <p className="text-neutral mt-1">Book your parking or valet service in advance</p>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import {
   LayoutDashboard,
   BarChart3,
@@ -59,6 +60,12 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F1F5F9] font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
+      <Helmet>
+        <title>Dashboard — SmartPark</title>
+        <meta name="description" content="View your SmartPark dashboard. Monitor parking activity, bookings, and system performance." />
+        <meta property="og:title" content="Dashboard — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/dashboard" />
+      </Helmet>
       {/* Sidebar */}
       <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 hidden lg:flex flex-col sticky top-0 h-screen z-50">
         <div className="p-8">

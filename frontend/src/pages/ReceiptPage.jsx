@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { CheckCircle2, MapPin, Calendar, Clock, Car, Download, ArrowRight } from 'lucide-react';
 
@@ -29,6 +30,12 @@ const ReceiptPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto">
+      <Helmet>
+        <title>Booking Confirmed — SmartPark</title>
+        <meta name="description" content="Your SmartPark booking is confirmed. Download your digital receipt and track your valet." />
+        <meta property="og:title" content="Booking Confirmed — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/receipt" />
+      </Helmet>
       <div className="max-w-2xl mx-auto w-full">
         
         {/* Success Header */}

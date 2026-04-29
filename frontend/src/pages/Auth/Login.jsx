@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
@@ -53,6 +54,12 @@ const Login = () => {
       title="Welcome Back" 
       subtitle="Enter your details to access your account"
     >
+      <Helmet>
+        <title>Sign In — SmartPark</title>
+        <meta name="description" content="Sign in to your SmartPark account to book parking spots and track your valet in real-time." />
+        <meta property="og:title" content="Sign In — SmartPark" />
+        <meta property="og:url" content="https://smartpark.app/login" />
+      </Helmet>
       <Formik
         initialValues={{ email: '', password: '', rememberMe: false }}
         validationSchema={LoginSchema}
