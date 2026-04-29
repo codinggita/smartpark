@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { auth } from '../firebase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -7,7 +8,67 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
+
+// ─── Request Interceptor ───────────────────────────────────────────────────────
+// Attaches the current Firebase ID token to every outgoing request
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.warn('Could not attach auth token:', error.message);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ─── Response Interceptor ─────────────────────────────────────────────────────
+// Centralised error handling: logs, normalises, and re-throws
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const { response } = error;
+
+    if (!response) {
+      // Network error or server unreachable
+      return Promise.reject(new Error('Network error. Please check your connection.'));
+    }
+
+    const status = response.status;
+    const message = response.data?.message || error.message;
+
+    if (status === 401) {
+      // Token expired – clear local auth data and redirect to login
+      localStorage.removeItem('smartpark_user_role');
+      localStorage.removeItem('smartpark_guest_mode');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+      return Promise.reject(new Error('Session expired. Please log in again.'));
+    }
+
+    if (status === 403) {
+      return Promise.reject(new Error('You do not have permission to perform this action.'));
+    }
+
+    if (status === 404) {
+      return Promise.reject(new Error(message || 'Resource not found.'));
+    }
+
+    if (status >= 500) {
+      return Promise.reject(new Error('Server error. Please try again later.'));
+    }
+
+    return Promise.reject(new Error(message || 'An unexpected error occurred.'));
+  }
+);
 
 export const parkingService = {
   getZones: async () => {
